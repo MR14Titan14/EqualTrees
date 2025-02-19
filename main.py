@@ -32,7 +32,7 @@ def get_conflict_nodes(tree1: Tree, tree2: Tree):
 
 def make_equal(n, tree1: Tree, tree2: Tree):
     operations = 0
-    conflict_nodes = get_conflict_nodes(n, tree1, tree2)
+    conflict_nodes = get_conflict_nodes(tree1, tree2)
     while conflict_nodes != []:
         conflict_parents = {i: 0 for i in range(1, n + 1)}
         for i in conflict_nodes:
@@ -46,11 +46,13 @@ def make_equal(n, tree1: Tree, tree2: Tree):
             worst_node = temp[0]
         tree1.remove_node(worst_node)
         tree2.remove_node(worst_node)
+        print(f"Удалил узел {worst_node} в дереве 1")
+        print(f"Удалил узел {worst_node} в дереве 2")
         operations += 2
-        conflict_nodes = get_conflict_nodes(n, tree1, tree2)
+        conflict_nodes = get_conflict_nodes(tree1, tree2)
     return operations
 
 
-n, tree1, tree2 = read_from_file("input.txt")
+n, tree1, tree2 = read_from_file("input3.txt")
 
 print(make_equal(n, tree1, tree2))

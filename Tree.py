@@ -32,4 +32,3 @@ class Tree:
         for child in node_to_remove.childs:
             parent_node.add_child(child)
         del self.nodes[value]  # Remove from the node list
-        print(f"Удалил узел {value}")
