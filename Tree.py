@@ -23,7 +23,7 @@ class Tree:
         return structure
 
     def remove_node(self, value):
-        if value in self.nodes and value != 1:
+        if value not in self.nodes.keys() or value == 1:
             print(f"Невозможно удалить узел {value}.")
             return
         node_to_remove = self.nodes[value]
