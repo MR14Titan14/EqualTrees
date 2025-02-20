@@ -1,4 +1,10 @@
 from Tree import Tree
+from equalize import make_equal
+
+import networkx as nx
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import tkinter as tk
 
 
 def read_from_file(path):
@@ -17,42 +23,70 @@ def read_from_file(path):
     return n, tree1, tree2
 
 
-def get_conflict_nodes(tree1: Tree, tree2: Tree):
-    conflict_nodes = []
-    nodes = list(tree1.nodes.keys())
-    nodes.remove(1)
-    for i in nodes:
-        if i not in tree1.nodes.keys() or i not in tree2.nodes.keys():
-            conflict_nodes.append(i)
-        else:
-            if tree1.nodes[i].parent.value is not tree2.nodes[i].parent.value:
-                conflict_nodes.append(i)
-    return conflict_nodes
+def draw_graphs(tree1, tree2, deleted):
+    G1 = nx.Graph()
+    for node in tree1.nodes.values():
+        if node.parent:
+            G1.add_edge(node.parent.value, node.value)
+    G2 = nx.Graph()
+    for node in tree2.nodes.values():
+        if node.parent:
+            G2.add_edge(node.parent.value, node.value)
+
+    fig = plt.figure(figsize=(10, 5))
+
+    plt.subplot(121)
+    pos1 = nx.spring_layout(G1)
+    nx.draw(G1, pos1, with_labels=True, node_color='lightblue', node_size=500)
+    plt.title("Tree1")
+    plt.text(0.5, 0, deleted, color='red', fontsize='14', horizontalalignment='left', transform=plt.gca().transAxes)
+
+    plt.subplot(122)
+    pos2 = nx.spring_layout(G2)
+    nx.draw(G2, pos2, with_labels=True, node_color='lightgreen', node_size=500)
+    plt.title("Tree2")
+    plt.text(0.5, 0, deleted, color='red', fontsize='14', horizontalalignment='left', transform=plt.gca().transAxes)
+
+    return fig
 
 
-def make_equal(n, tree1: Tree, tree2: Tree):
-    operations = 0
-    conflict_nodes = get_conflict_nodes(tree1, tree2)
-    while conflict_nodes != []:
-        conflict_parents = {i: 0 for i in range(1, n + 1)}
-        for i in conflict_nodes:
-            conflict_parents[tree1.nodes[i].parent.value] += 1
-            conflict_parents[tree2.nodes[i].parent.value] += 1
-        if 1 in conflict_parents.keys():
-            del conflict_parents[1]
-        worst_node, conf_num = max(conflict_parents.items(), key=lambda item: item[1])
-        if conf_num == 1:
-            temp = [node for node in conflict_nodes if tree1.nodes[node].parent.value == worst_node]
-            worst_node = temp[0]
-        tree1.remove_node(worst_node)
-        tree2.remove_node(worst_node)
-        print(f"Удалил узел {worst_node} в дереве 1")
-        print(f"Удалил узел {worst_node} в дереве 2")
-        operations += 2
-        conflict_nodes = get_conflict_nodes(tree1, tree2)
-    return operations
+def update(canvas, figures, current_page, diff):
+    current_page[0] += diff
+    if 0 <= current_page[0] < len(figures):
+        canvas.figure = figures[current_page[0]]
+        canvas.draw()
 
 
-n, tree1, tree2 = read_from_file("input3.txt")
+def main():
+    n, tree1, tree2 = read_from_file("input5.txt")
 
-print(make_equal(n, tree1, tree2))
+    orig = draw_graphs(tree1, tree2, "")
+    operations, figures = make_equal(n, tree1, tree2, draw_graphs)
+
+    print(f"Количество операций: {operations}")
+
+    root = tk.Tk()
+    root.title("Tree Visualizer")
+
+    fig = plt.figure(figsize=(10, 5))
+    canvas = FigureCanvasTkAgg(fig, master=root)
+    canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+    figures.insert(0, orig)
+
+    canvas.figure = figures[0]
+    canvas.draw()
+    current_page = [0]
+
+    button_frame = tk.Frame(root)
+    button_frame.pack(side=tk.BOTTOM, pady=10, anchor=tk.CENTER)
+    button = tk.Button(root, text="<", command=lambda: update(canvas, figures, current_page, -1))
+    button.pack(side=tk.LEFT)
+    button = tk.Button(root, text=">", command=lambda: update(canvas, figures, current_page, 1))
+    button.pack(side=tk.LEFT)
+
+    root.mainloop()
+
+
+if __name__ == "__main__":
+    main()
