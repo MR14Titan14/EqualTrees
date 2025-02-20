@@ -26,8 +26,12 @@ def make_equal(n, tree1: Tree, tree2: Tree, callback=None):
         if 1 in conflict_parents.keys():
             del conflict_parents[1]
         worst_node, conf_num = max(conflict_parents.items(), key=lambda item: item[1])
+        print(worst_node)
         if conf_num == 1:
-            temp = [node for node in conflict_nodes if tree1.nodes[node].parent.value == worst_node]
+            temp1 = [node for node in conflict_nodes if tree1.nodes[node].parent.value == worst_node]
+            temp2 = [node for node in conflict_nodes if tree2.nodes[node].parent.value == worst_node]
+            temp=temp1+temp2
+            print(temp)
             worst_node = temp[0]
         tree1.remove_node(worst_node)
         tree2.remove_node(worst_node)
