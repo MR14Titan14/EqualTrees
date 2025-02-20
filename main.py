@@ -51,8 +51,8 @@ def draw_graphs(tree1, tree2, deleted):
 
 
 def update(canvas, figures, current_page, diff):
-    current_page[0] += diff
-    if 0 <= current_page[0] < len(figures):
+    if 0 <= current_page[0]+diff < len(figures):
+        current_page[0] += diff
         canvas.figure = figures[current_page[0]]
         canvas.draw()
 
